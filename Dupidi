@@ -1,0 +1,114 @@
+-- Creating the ScreenGui and necessary components in Roblox Studio
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local GemInput = Instance.new("TextBox")
+local DupingButton = Instance.new("TextButton")
+local Section = Instance.new("TextLabel")
+local Badge = Instance.new("TextLabel") -- Badge notification
+
+-- Parent all elements to the ScreenGui
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Frame.Parent = ScreenGui
+GemInput.Parent = Frame
+DupingButton.Parent = Frame
+Section.Parent = Frame
+Badge.Parent = ScreenGui -- Badge will be parented to the ScreenGui
+
+-- Halloween Theme Colors
+local blackColor = Color3.fromRGB(0, 0, 0)
+local orangeColor = Color3.fromRGB(255, 85, 0)
+local purpleColor = Color3.fromRGB(128, 0, 128)
+local greenColor = Color3.fromRGB(0, 255, 0)
+
+-- Frame properties (Black background with orange border)
+Frame.Size = UDim2.new(0, 400, 0, 300)
+Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+Frame.BackgroundColor3 = blackColor
+Frame.BorderSizePixel = 5
+Frame.BorderColor3 = orangeColor
+
+-- Section (label) properties (Orange text for title)
+Section.Size = UDim2.new(0, 380, 0, 50)
+Section.Position = UDim2.new(0, 10, 0, 10)
+Section.BackgroundTransparency = 1
+Section.Text = "HALLOWEEN GEMS DUPER🌕" -- Title updated
+Section.TextSize = 24
+Section.TextColor3 = orangeColor
+Section.Font = Enum.Font.Fantasy
+
+-- Gem Input properties (Purple background with green text)
+GemInput.Size = UDim2.new(0, 300, 0, 50)
+GemInput.Position = UDim2.new(0, 50, 0, 80)
+GemInput.BackgroundColor3 = purpleColor
+GemInput.TextColor3 = greenColor
+GemInput.PlaceholderText = "Enter amount of gems"
+GemInput.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
+GemInput.TextSize = 20
+GemInput.Font = Enum.Font.Arcade
+
+-- Duping Button properties (Green button with black text)
+DupingButton.Size = UDim2.new(0, 300, 0, 50)
+DupingButton.Position = UDim2.new(0, 50, 0, 150)
+DupingButton.BackgroundColor3 = greenColor
+DupingButton.TextColor3 = blackColor
+DupingButton.Text = "💎START DUPINGG.....💎"
+DupingButton.TextSize = 20
+DupingButton.Font = Enum.Font.Fantasy
+
+-- Badge notification properties
+Badge.Size = UDim2.new(0, 250, 0, 50)
+Badge.Position = UDim2.new(0.5, -125, 0.2, 0) -- Centered
+Badge.BackgroundColor3 = Color3.fromRGB(255, 165, 0) -- Orange background for badge
+Badge.TextColor3 = blackColor
+Badge.Text = "This script is made by Vyxrion"
+Badge.TextSize = 18
+Badge.Font = Enum.Font.Fantasy
+Badge.Visible = false -- Initially invisible
+
+-- Duping script setup
+local desiredAmount = nil -- Initialize this variable to store input
+
+local function DupedGems()
+    local library = require(game.ReplicatedStorage.Library.Client.CurrencyCmds)
+    local originalGetFunction = library.Get
+
+    local poop = originalGetFunction("Diamonds")
+    local increment = desiredAmount / 15 
+    local delayTime = 0.1
+
+    if desiredAmount > 0 and desiredAmount < 30000000001 then
+        library.Get = function(currencyId)
+            if currencyId == "Diamonds" then
+                return poop
+            else
+                return originalGetFunction(currencyId)
+            end
+        end
+
+        while poop < desiredAmount do
+            poop = poop + increment
+            print(library.Get("Diamonds"))
+            wait(delayTime)
+        end
+
+        -- Show badge notification after script executes
+        Badge.Visible = true
+        wait(3) -- Show badge for 3 seconds
+        Badge.Visible = false
+
+    else
+        local message = require(game.ReplicatedStorage.Library.Client.Message)
+        message.Error("Hey you need to enter a number between 0 and 25b!")
+    end
+end
+
+-- Button functionality
+DupingButton.MouseButton1Click:Connect(function()
+    desiredAmount = tonumber(GemInput.Text) -- Get the input from the TextBox
+    if desiredAmount and desiredAmount > 0 then
+        DupedGems() -- Start the duping process
+    else
+        local message = require(game.ReplicatedStorage.Library.Client.Message)
+        message.Error("Please enter a valid amount before starting.")
+    end
+end)
